@@ -1,0 +1,33 @@
+{
+	"$schema": "https://json.schemastore.org/nest-cli",
+	"collection": "@nestjs/schematics",
+	"sourceRoot": "apps/furnix-api/src",
+	"compilerOptions": {
+		"deleteOutDir": true,
+		"webpack": true,
+		"tsConfigPath": "apps/furnix-api/tsconfig.app.json"
+	},
+	"monorepo": true,
+	"root": "apps/furnix-api",
+	"projects": {
+		"furnix-api": {
+			"type": "application",
+			"root": "apps/furnix-api",
+			"entryFile": "main",
+			"sourceRoot": "apps/furnix-api/src",
+			"compilerOptions": {
+				"tsConfigPath": "apps/furnix-api/tsconfig.app.json"
+			}
+		},
+		"furnix-batch": {
+			"type": "application",
+			"root": "apps/furnix-batch",
+			"entryFile": "main",
+			"sourceRoot": "apps/furnix-batch/src",
+			"compilerOptions": {
+				"tsConfigPath": "apps/furnix-batch/tsconfig.app.json"
+			}
+		}
+	
+	}
+}

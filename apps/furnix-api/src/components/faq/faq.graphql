@@ -1,0 +1,46 @@
+type Faq {
+  id: ID!
+  noticeTitle: String!
+  noticeContent: String!
+  noticeCategory: String!
+  noticeStatus: String!
+  memberId: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+input CreateFaqInput {
+  title: String!
+  content: String!
+}
+
+input UpdateFaqInput {
+  title: String
+  content: String
+  status: String
+}
+
+input FaqFilterInput {
+  search: String
+  status: String
+}
+
+type FaqPagination {
+  items: [Faq!]!
+  total: Int!
+  page: Int!
+  limit: Int!
+}
+
+type Query {
+  faqs(filter: FaqFilterInput, page: Int, limit: Int): FaqPagination!
+  faq(id: ID!): Faq
+}
+
+type Mutation {
+  createFaq(input: CreateFaqInput!): Faq!
+  updateFaq(id: ID!, input: UpdateFaqInput!): Faq!
+  deleteFaq(id: ID!): Boolean!
+}
+
+scalar DateTime
