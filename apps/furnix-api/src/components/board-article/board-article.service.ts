@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ObjectId } from 'mongoose';
 import { BoardArticle, BoardArticles } from '../../libs/dto/board-article/board-article';
@@ -18,14 +18,20 @@ import { lookupAuthMemberLiked, lookupMember, shapeOfMongoObjectId } from '../..
 import { LikeInput } from '../../libs/dto/like/like.input';
 import { LikeGroup } from '../../libs/enums/like.enum';
 import { LikeService } from '../like/like.service';
+import { NotificationService } from '../../notification/notification.service';
+import { NotificationInput } from '../../libs/dto/notification/notification.input';
+import { NotificationGroup, NotificationStatus, NotificationType } from '../../libs/enums/notification.enum';
+import { SocketGateway } from '../../socket/socket.gateway';
 
 @Injectable()
 export class BoardArticleService {
 	constructor(
 		@InjectModel('BoardArticle') private readonly boardArticleModel: Model<BoardArticle>,
+		@Inject('SOCKET_GATEWAY') private readonly socketGateway: SocketGateway,
 		private readonly memberService: MemberService,
 		private readonly viewService: ViewService,
 		private readonly likeService: LikeService,
+		private readonly notificationService: NotificationService,
 	) {}
 
 	// createBoardArticle
@@ -142,6 +148,23 @@ export class BoardArticleService {
 		};
 
 		const modifier: number = await this.likeService.toggleLike(input);
+		if (modifier === 1) {
+			const notificationInput: NotificationInput = {
+				notificationType: NotificationType.LIKE,
+				notificationGroup: NotificationGroup.ARTICLE,
+				notificationTitle: 'Like',
+				notificationDesc: 'Article liked!',
+				notificationStatus: NotificationStatus.WAIT,
+				memberId: memberId,
+				authorId: target.memberId,
+				receiverId: target.memberId,
+				productId: target._id,
+			};
+			const notification: any = await this.notificationService.createNotification(notificationInput);
+
+			const clientId = target.memberId.toString(); // Ensure _id exists
+			await this.socketGateway.sendNotification(clientId, [notification]);
+		}
 		const result = await this.boardArticleStatsEditor({
 			_id: likeRefId,
 			targetKey: 'articleLikes',

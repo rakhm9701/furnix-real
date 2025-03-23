@@ -7,6 +7,9 @@ import { AuthModule } from '../auth/auth.module';
 import { MemberModule } from '../member/member.module';
 import { ViewModule } from '../view/view.module';
 import { LikeModule } from '../like/like.module';
+import { NotificationModule } from '../../notification/notification.module';
+import { SocketModule } from '../../socket/socket.module';
+import { SocketGateway } from '../../socket/socket.gateway';
 
 @Module({
 	imports: [
@@ -20,8 +23,18 @@ import { LikeModule } from '../like/like.module';
 		MemberModule,
 		ViewModule,
 		LikeModule,
+		NotificationModule,
+		SocketModule,
 	],
-	providers: [BoardArticleResolver, BoardArticleService],
+	providers: [
+		BoardArticleResolver,
+		BoardArticleService,
+		SocketGateway,
+		{
+			provide: 'SOCKET_GATEWAY',
+			useExisting: SocketGateway,
+		},
+	],
 	exports: [BoardArticleService],
 })
 export class BoardArticleModule {}
