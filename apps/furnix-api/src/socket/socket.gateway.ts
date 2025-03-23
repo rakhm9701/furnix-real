@@ -70,10 +70,12 @@ export class SocketGateway implements OnGatewayInit {
 		this.emitMessage(infoMsg);
 		client.send(JSON.stringify({ event: 'getMessages', list: this.messagesList }));
 
-		// Send notifications
-		const notifications: any[] = await this.notificationService.checkNotification(authMember._id);
-		if (notifications && notifications.length > 0) {
-			await this.sendNotification(authMember._id.toString(), notifications);
+		// Send notifications - faqat authMember mavjud bo'lganda
+		if (authMember && authMember._id) {
+			const notifications: any[] = await this.notificationService.checkNotification(authMember._id);
+			if (notifications && notifications.length > 0) {
+				await this.sendNotification(authMember._id.toString(), notifications);
+			}
 		}
 	}
 
