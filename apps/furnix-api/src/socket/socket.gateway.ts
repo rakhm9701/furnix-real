@@ -8,17 +8,22 @@ import * as url from 'url';
 import { NotificationService } from '../notification/notification.service';
 import { NotificationT as CustomNotification } from '../libs/dto/notification/notification';
 
+// Guest foydalanuvchi uchun interfeys
+interface GuestUser {
+	memberNick: string;
+	_id?: any;
+}
 
 interface MessagePayload {
 	event: string;
 	text: string;
-	memberData: Member;
+	memberData: Member | GuestUser;
 }
 
 interface InfoPayload {
 	event: string;
 	totalClients: number;
-	memberData: Member;
+	memberData: Member | GuestUser;
 	action: string;
 }
 
@@ -26,7 +31,7 @@ interface InfoPayload {
 export class SocketGateway implements OnGatewayInit {
 	private logger: Logger = new Logger('SocketEventsGateway');
 	private summaryCLient: number = 0;
-	private clientsAuthMap = new Map<WebSocket, Member>();
+	private clientsAuthMap = new Map<WebSocket, Member | GuestUser>();
 	private messagesList: MessagePayload[] = [];
 
 	constructor(
@@ -55,7 +60,9 @@ export class SocketGateway implements OnGatewayInit {
 	public async handleConnection(client: WebSocket, req: any) {
 		const authMember = await this.retrieveAuth(req);
 		this.summaryCLient++;
-		this.clientsAuthMap.set(client, authMember);
+
+		// authMember null bo'lsa, GuestUser obyektini saqlash
+		this.clientsAuthMap.set(client, authMember || { memberNick: 'Guest' });
 
 		const clientNick: string = authMember?.memberNick ?? 'Guest';
 		this.logger.verbose(`Connecting [${clientNick}] & total [${this.summaryCLient}]`);
@@ -63,18 +70,22 @@ export class SocketGateway implements OnGatewayInit {
 		const infoMsg: InfoPayload = {
 			event: 'info',
 			totalClients: this.summaryCLient,
-			memberData: authMember,
+			memberData: authMember || { memberNick: 'Guest' },
 			action: 'joined',
 		};
 
 		this.emitMessage(infoMsg);
 		client.send(JSON.stringify({ event: 'getMessages', list: this.messagesList }));
 
-		// Send notifications - faqat authMember mavjud bo'lganda
+		// Faqat authMember mavjud bo'lganda notifikatsiyalarni yuborish
 		if (authMember && authMember._id) {
-			const notifications: any[] = await this.notificationService.checkNotification(authMember._id);
-			if (notifications && notifications.length > 0) {
-				await this.sendNotification(authMember._id.toString(), notifications);
+			try {
+				const notifications: CustomNotification[] = await this.notificationService.checkNotification(authMember._id);
+				if (notifications && notifications.length > 0) {
+					await this.sendNotification(authMember._id.toString(), notifications);
+				}
+			} catch (err) {
+				this.logger.error(`Error checking notifications: ${err.message}`);
 			}
 		}
 	}
@@ -118,11 +129,20 @@ export class SocketGateway implements OnGatewayInit {
 	@SubscribeMessage('sendNotification')
 	async sendNotification(clientId: string, notifications: CustomNotification[]): Promise<void> {
 		try {
-			const client = Array.from(this.clientsAuthMap.entries()).find(
-				([_, member]) => member._id.toString() === clientId,
-			)?.[0];
+			// member null bo'lishi mumkinligini tekshirish
+			const clientEntry = Array.from(this.clientsAuthMap.entries()).find(
+				([_, member]) => member && member._id && member._id.toString() === clientId,
+			);
+
+			if (!clientEntry) {
+				this.logger.warn(`No client found for ID: ${clientId}`);
+				return;
+			}
+
+			const client = clientEntry[0];
 			if (!client || client.readyState !== WebSocket.OPEN) return;
 
+			// Notifikatsiyalarni yuborish
 			const notificationPayload = JSON.stringify({
 				event: 'notification',
 				data: notifications,

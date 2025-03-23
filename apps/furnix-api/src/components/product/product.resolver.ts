@@ -19,7 +19,7 @@ import { shapeOfMongoObjectId } from '../../libs/config';
 import { ProductUpdate } from '../../libs/dto/product/product.update';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { NotificationT } from '../../libs/dto/notification/notification';
-
+import { NotificationService } from '../../notification/notification.service';
 
 @Resolver()
 export class ProductResolver {
@@ -173,4 +173,6 @@ export class ProductResolver {
 		console.log('Mutation: notificationsTargetProduct');
 		return await this.productService.allNotificationsTargetProduct(memberId);
 	}
+
+	
 }
