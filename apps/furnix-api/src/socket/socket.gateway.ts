@@ -5,7 +5,9 @@ import * as WebSocket from 'ws';
 import { AuthService } from '../components/auth/auth.service';
 import { Member } from '../libs/dto/member/member';
 import * as url from 'url';
-import { AuthMember } from '../components/auth/decorators/authMember.decorator';
+import { NotificationService } from '../notification/notification.service';
+import { NotificationT as CustomNotification } from '../libs/dto/notification/notification';
+
 
 interface MessagePayload {
 	event: string;
@@ -27,7 +29,10 @@ export class SocketGateway implements OnGatewayInit {
 	private clientsAuthMap = new Map<WebSocket, Member>();
 	private messagesList: MessagePayload[] = [];
 
-	constructor(private authService: AuthService) {}
+	constructor(
+		private authService: AuthService,
+		private notificationService: NotificationService,
+	) {}
 
 	@WebSocketServer()
 	server: Server;
@@ -64,6 +69,12 @@ export class SocketGateway implements OnGatewayInit {
 
 		this.emitMessage(infoMsg);
 		client.send(JSON.stringify({ event: 'getMessages', list: this.messagesList }));
+
+		// Send notifications
+		const notifications: any[] = await this.notificationService.checkNotification(authMember._id);
+		if (notifications && notifications.length > 0) {
+			await this.sendNotification(authMember._id.toString(), notifications);
+		}
 	}
 
 	public handleDisconnect(client: WebSocket) {
@@ -100,6 +111,25 @@ export class SocketGateway implements OnGatewayInit {
 		if (this.messagesList.length >= 5) this.messagesList.splice(0, this.messagesList.length - 5);
 
 		this.emitMessage(newMessage);
+	}
+
+	@SubscribeMessage('sendNotification')
+	async sendNotification(clientId: string, notifications: CustomNotification[]): Promise<void> {
+		try {
+			const client = Array.from(this.clientsAuthMap.entries()).find(
+				([_, member]) => member._id.toString() === clientId,
+			)?.[0];
+			if (!client || client.readyState !== WebSocket.OPEN) return;
+
+			const notificationPayload = JSON.stringify({
+				event: 'notification',
+				data: notifications,
+			});
+			client.send(notificationPayload);
+			this.logger.verbose(`Sent ${notifications.length} notifications to client ${clientId}`);
+		} catch (error) {
+			this.logger.error(`Notification send error: ${error.message}`);
+		}
 	}
 
 	private broadCastMessage(sender: WebSocket, message: InfoPayload | MessagePayload) {
