@@ -38,6 +38,6 @@ export class NotificationService {
   await this.notificationModel
    .updateMany({ receiverId: memberId }, { $set: { notificationStatus: notificationStatus } })
    .exec();
-  return 'succedd';
+  return 'succed';
  }
 }
