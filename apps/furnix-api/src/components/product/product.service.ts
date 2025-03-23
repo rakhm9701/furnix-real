@@ -21,6 +21,9 @@ import { lookupAuthMemberLiked, lookupMember, shapeOfMongoObjectId } from '../..
 import { LikeService } from '../like/like.service';
 import { LikeInput } from '../../libs/dto/like/like.input';
 import { LikeGroup } from '../../libs/enums/like.enum';
+import { NotificationStatus } from '../../libs/enums/notification.enum';
+import { NotificationService } from '../../notification/notification.service';
+import { NotificationT } from '../../libs/dto/notification/notification';
 
 @Injectable()
 export class ProductService {
@@ -29,6 +32,7 @@ export class ProductService {
 		private readonly memberService: MemberService,
 		private readonly viewService: ViewService,
 		private readonly likeService: LikeService,
+		private notificationService: NotificationService,
 	) {}
 
 	// createProduct
@@ -42,7 +46,7 @@ export class ProductService {
 				targetKey: 'memberProducts',
 				modifier: 1,
 			});
-			console.log("result:", result)
+			console.log('result:', result);
 			return result;
 		} catch (err) {
 			console.log('Error, Service.model:', err.message);
@@ -310,5 +314,18 @@ export class ProductService {
 		if (!result) throw new InternalServerErrorException(Message.REMOVE_FAILE);
 
 		return result;
+	}
+
+	//notificationTargetProduct
+	public async notificationTargetProduct(notificationId: ObjectId): Promise<NotificationT> {
+		return await this.notificationService.readNotification(notificationId, NotificationStatus.READ);
+	}
+
+	//allNotificationsTargetProduct
+	public async allNotificationsTargetProduct(memberId: ObjectId): Promise<String> {
+		const result = await this.notificationService.allReadNotification(memberId, NotificationStatus.READ);
+		if (result) {
+			return 'Read succedd!';
+		}
 	}
 }

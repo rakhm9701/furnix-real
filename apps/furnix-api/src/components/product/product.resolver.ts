@@ -18,6 +18,8 @@ import { WithoutGuard } from '../auth/guards/without.guard';
 import { shapeOfMongoObjectId } from '../../libs/config';
 import { ProductUpdate } from '../../libs/dto/product/product.update';
 import { AuthGuard } from '../auth/guards/auth.guard';
+import { NotificationT } from '../../libs/dto/notification/notification';
+
 
 @Resolver()
 export class ProductResolver {
@@ -32,7 +34,7 @@ export class ProductResolver {
 		@AuthMember('_id') memberId: ObjectId,
 	): Promise<Product> {
 		console.log('mutation: createProduct');
-		console.log("input:", input)
+		console.log('input:', input);
 		input.memberId = memberId;
 		return await this.productService.createProduct(input);
 	}
@@ -146,5 +148,29 @@ export class ProductResolver {
 		console.log('Mutation: removeProductByAdmin');
 		const productId = shapeOfMongoObjectId(input);
 		return await this.productService.removeProductByAdmin(productId);
+	}
+
+	/** Notification **/
+	//notificationTargetProduct
+	@UseGuards(AuthGuard)
+	@Mutation(() => NotificationT)
+	public async notificationTargetProduct(
+		@Args('input') input: string,
+		@AuthMember('_id') memberId: ObjectId,
+	): Promise<NotificationT> {
+		console.log('Mutation: notificationTargetProduct');
+		const notificationId = shapeOfMongoObjectId(input);
+		return await this.productService.notificationTargetProduct(notificationId);
+	}
+
+	//notificationsTargetProduct
+	@UseGuards(AuthGuard)
+	@Mutation(() => String)
+	public async notificationsTargetProduct(
+		@Args('input') input: string,
+		@AuthMember('_id') memberId: ObjectId,
+	): Promise<String> {
+		console.log('Mutation: notificationsTargetProduct');
+		return await this.productService.allNotificationsTargetProduct(memberId);
 	}
 }
