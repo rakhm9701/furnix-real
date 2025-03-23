@@ -46,7 +46,15 @@ export class CommentResolver {
 		@AuthMember('_id') memberId: ObjectId,
 	): Promise<Comments> {
 		console.log('Query: getComments');
-		input.search.commentRefId = shapeOfMongoObjectId(input.search.commentRefId);
+		// input.search.commentRefId = shapeOfMongoObjectId(input.search.commentRefId);
+		if (input.search && input.search.commentRefId) {
+			try {
+				input.search.commentRefId = shapeOfMongoObjectId(input.search.commentRefId);
+			} catch (error) {
+				console.error('Invalid commentRefId format:', error);
+				throw new Error('Invalid commentRefId format. Must be a valid ObjectId');
+			}
+		}
 		const result = await this.commentService.getComments(memberId, input);
 		return result;
 	}
