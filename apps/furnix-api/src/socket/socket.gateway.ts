@@ -8,7 +8,6 @@ import * as url from 'url';
 import { NotificationService } from '../notification/notification.service';
 import { NotificationT as CustomNotification } from '../libs/dto/notification/notification';
 
-// Guest foydalanuvchi uchun interfeys
 interface GuestUser {
 	memberNick: string;
 	_id?: any;
@@ -61,7 +60,6 @@ export class SocketGateway implements OnGatewayInit {
 		const authMember = await this.retrieveAuth(req);
 		this.summaryCLient++;
 
-		// authMember null bo'lsa, GuestUser obyektini saqlash
 		this.clientsAuthMap.set(client, authMember || { memberNick: 'Guest' });
 
 		const clientNick: string = authMember?.memberNick ?? 'Guest';
@@ -77,7 +75,6 @@ export class SocketGateway implements OnGatewayInit {
 		this.emitMessage(infoMsg);
 		client.send(JSON.stringify({ event: 'getMessages', list: this.messagesList }));
 
-		// Faqat authMember mavjud bo'lganda notifikatsiyalarni yuborish
 		if (authMember && authMember._id) {
 			try {
 				const notifications: CustomNotification[] = await this.notificationService.checkNotification(authMember._id);
@@ -129,7 +126,6 @@ export class SocketGateway implements OnGatewayInit {
 	@SubscribeMessage('sendNotification')
 	async sendNotification(clientId: string, notifications: CustomNotification[]): Promise<void> {
 		try {
-			// member null bo'lishi mumkinligini tekshirish
 			const clientEntry = Array.from(this.clientsAuthMap.entries()).find(
 				([_, member]) => member && member._id && member._id.toString() === clientId,
 			);
@@ -142,7 +138,6 @@ export class SocketGateway implements OnGatewayInit {
 			const client = clientEntry[0];
 			if (!client || client.readyState !== WebSocket.OPEN) return;
 
-			// Notifikatsiyalarni yuborish
 			const notificationPayload = JSON.stringify({
 				event: 'notification',
 				data: notifications,

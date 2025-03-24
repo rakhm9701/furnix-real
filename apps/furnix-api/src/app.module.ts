@@ -10,6 +10,7 @@ import { DatabaseModule } from './database/database.module';
 import { T } from './libs/types/common';
 import { SocketModule } from './socket/socket.module';
 import { NotificationModule } from './notification/notification.module';
+import { FaqModule } from './components/faq/faq.module';
 
 @Module({
 	imports: [
@@ -33,6 +34,7 @@ import { NotificationModule } from './notification/notification.module';
 		ComponentsModule,
 		DatabaseModule,
 		SocketModule,
+		FaqModule,
 	],
 	controllers: [AppController],
 	providers: [AppService, AppResolver],
