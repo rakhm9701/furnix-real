@@ -10,6 +10,7 @@ export enum FaqCategory {
 	OTHER = 'OTHER',
 }
 
+// Register enums for GraphQL schema
 registerEnumType(FaqCategory, {
 	name: 'FaqCategory',
 	description: 'The category of FAQ',
@@ -21,6 +22,7 @@ export enum FaqStatus {
 	DELETE = 'DELETE',
 }
 
+// Register enums for GraphQL schema
 registerEnumType(FaqStatus, {
 	name: 'FaqStatus',
 	description: 'The status of FAQ',
