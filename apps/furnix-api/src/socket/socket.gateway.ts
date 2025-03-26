@@ -115,15 +115,12 @@ export class SocketGateway implements OnGatewayInit {
 			memberData: authMember,
 		};
 
-		const clientNick: string = authMember?.memberNick ?? 'Guest';
-		this.logger.verbose(`NEW MESSAGE [${clientNick}]: ${payload}`);
-
 		this.messagesList.push(newMessage);
 		if (this.messagesList.length >= 5) this.messagesList.splice(0, this.messagesList.length - 5);
 
-		this.emitMessage(newMessage);
+		// Faqat boshqa mijozlarga yuborish (broadCastMessage yordamida)
+		this.broadCastMessage(client, newMessage);
 	}
-
 	@SubscribeMessage('sendNotification')
 	async sendNotification(clientId: string, notifications: CustomNotification[]): Promise<void> {
 		try {
