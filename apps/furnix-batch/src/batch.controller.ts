@@ -36,7 +36,7 @@ export class BatchController {
 		try {
 			this.logger['context'] = 'BATCH_TOP_PRDUCTS';
 			this.logger.debug('EXCUTED');
-			await this.batchService.batchNewProducts();
+			await this.batchService.batchTopProducts();
 		} catch (err) {
 			this.logger.error(err);
 		}

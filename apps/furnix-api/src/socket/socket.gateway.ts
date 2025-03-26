@@ -60,7 +60,7 @@ export class SocketGateway implements OnGatewayInit {
 		const authMember = await this.retrieveAuth(req);
 		this.summaryCLient++;
 
-		this.clientsAuthMap.set(client, authMember || { memberNick: 'Guest' });
+		this.clientsAuthMap.set(client, authMember);
 
 		const clientNick: string = authMember?.memberNick ?? 'Guest';
 		this.logger.verbose(`Connecting [${clientNick}] & total [${this.summaryCLient}]`);
@@ -68,7 +68,7 @@ export class SocketGateway implements OnGatewayInit {
 		const infoMsg: InfoPayload = {
 			event: 'info',
 			totalClients: this.summaryCLient,
-			memberData: authMember || { memberNick: 'Guest' },
+			memberData: authMember,
 			action: 'joined',
 		};
 
@@ -78,6 +78,7 @@ export class SocketGateway implements OnGatewayInit {
 		if (authMember && authMember._id) {
 			try {
 				const notifications: CustomNotification[] = await this.notificationService.checkNotification(authMember._id);
+
 				if (notifications && notifications.length > 0) {
 					await this.sendNotification(authMember._id.toString(), notifications);
 				}

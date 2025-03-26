@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ObjectId } from 'mongoose';
 import { Products, Product } from '../../libs/dto/product/product';
@@ -21,14 +21,17 @@ import { lookupAuthMemberLiked, lookupMember, shapeOfMongoObjectId } from '../..
 import { LikeService } from '../like/like.service';
 import { LikeInput } from '../../libs/dto/like/like.input';
 import { LikeGroup } from '../../libs/enums/like.enum';
-import { NotificationStatus } from '../../libs/enums/notification.enum';
+import { NotificationGroup, NotificationStatus, NotificationType } from '../../libs/enums/notification.enum';
 import { NotificationService } from '../../notification/notification.service';
 import { NotificationT } from '../../libs/dto/notification/notification';
+import { NotificationInput } from '../../libs/dto/notification/notification.input';
+import { SocketGateway } from '../../socket/socket.gateway';
 
 @Injectable()
 export class ProductService {
 	constructor(
 		@InjectModel('Product') private readonly productModel: Model<Product>,
+		@Inject('SOCKET_GATEWAY') private readonly socketGateway: SocketGateway,
 		private readonly memberService: MemberService,
 		private readonly viewService: ViewService,
 		private readonly likeService: LikeService,
@@ -241,6 +244,29 @@ export class ProductService {
 		};
 
 		const modifier: number = await this.likeService.toggleLike(input);
+		if (modifier === 1) {
+			const notificationInput: NotificationInput = {
+				notificationType: NotificationType.LIKE,
+				notificationGroup: NotificationGroup.PRODUCT,
+				notificationTitle: 'Like',
+				notificationDesc: 'Product liked!',
+				notificationStatus: NotificationStatus.WAIT,
+				memberId: memberId,
+				authorId: target.memberId,
+				receiverId: target.memberId,
+				productId: target._id,
+			};
+			const notification = await this.notificationService.createNotification(notificationInput);
+
+			
+
+		
+				
+
+				const clientId = target.memberId.toString(); // Ensure _id exists
+				await this.socketGateway.sendNotification(clientId, [notification]);
+			
+		}
 		const result = await this.productStatsEditor({ _id: likeRefId, targetKey: 'productLikes', modifier: modifier });
 		console.log('one:', likeRefId);
 		if (!result) throw new InternalServerErrorException(Message.SOMETHING_WENT_WRONG);

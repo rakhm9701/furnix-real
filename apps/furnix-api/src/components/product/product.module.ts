@@ -8,6 +8,7 @@ import { ViewModule } from '../view/view.module';
 import { MemberModule } from '../member/member.module';
 import { LikeModule } from '../like/like.module';
 import { NotificationModule } from '../../notification/notification.module';
+import { SocketGateway } from '../../socket/socket.gateway';
 
 @Module({
 	imports: [
@@ -23,7 +24,15 @@ import { NotificationModule } from '../../notification/notification.module';
 		LikeModule,
 		NotificationModule,
 	],
-	providers: [ProductResolver, ProductService],
+	providers: [
+		ProductResolver,
+		ProductService,
+		SocketGateway,
+		{
+			provide: 'SOCKET_GATEWAY',
+			useExisting: SocketGateway,
+		},
+	],
 	exports: [ProductService],
 })
 export class ProductModule {}
