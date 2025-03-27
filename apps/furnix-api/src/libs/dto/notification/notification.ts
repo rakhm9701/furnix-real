@@ -22,8 +22,8 @@ export class NotificationT {
 	@Field(() => String)
 	notificationDesc: String;
 
-	@Field(() => String)
-	memberId: ObjectId;
+	@Field(() => String, { nullable: true })
+	memberId?: ObjectId;
 
 	@Field(() => String)
 	authorId: ObjectId;
