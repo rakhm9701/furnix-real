@@ -5,6 +5,7 @@ import { NotificationInput } from '../libs/dto/notification/notification.input';
 import { Message } from '../libs/enums/common.enum';
 import { NotificationStatus } from '../libs/enums/notification.enum';
 import { NotificationT } from '../libs/dto/notification/notification';
+import { shapeOfMongoObjectId } from '../libs/config';
 
 @Injectable()
 export class NotificationService {
@@ -47,7 +48,7 @@ export class NotificationService {
 
 		// Agar memberId null bo'lsa, default qiymat berish
 		if (!notification.memberId) {
-			notification.memberId = new ObjectId('000000000000000000000000');
+			notification.memberId = shapeOfMongoObjectId('000000000000000000000000');
 		}
 
 		return notification;
