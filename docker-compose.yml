@@ -3,30 +3,32 @@ services:
     container_name: furnix-api
     restart: always
     image: node:20.17.0
-    ports:
-      - 5001:5007
+    network_mode: "host"
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    environment:
+      - NODE_OPTIONS=--dns-result-order=ipv4first
+      - PORT_API=5007  # Port o'zgaruvchisini qo'shing
     volumes:
       - ./:/user/src/furnix-real
     working_dir: /user/src/furnix-real
-    networks:
-      - monorepo-network
-
-    #FOR PRODUCTION
     command: bash -c "rm -rf dist && npm install && npm run build && npm run start:prod"
-
+  
   furnix-batch:
     container_name: furnix-batch
     restart: unless-stopped
     image: node:20.17.0
-    ports:
-      - 5002:5008
+    network_mode: "host"
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    environment:
+      - NODE_OPTIONS=--dns-result-order=ipv4first
+      - PORT_BATCH=5008  # Port o'zgaruvchisini qo'shing
     volumes:
       - ./:/user/src/furnix-real
     working_dir: /user/src/furnix-real
-    networks:
-      - monorepo-network
-
-    #FOR PRODUCTION
     command: bash -c "npm install && npm run build && npm run start:prod:batch"
 
 networks:
