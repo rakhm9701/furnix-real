@@ -7,8 +7,6 @@ import { Connection } from 'mongoose';
 		MongooseModule.forRootAsync({
 			useFactory: () => ({
 				uri: process.env.NODE_ENV === 'production' ? process.env.MONGO_PROD : process.env.MONGO_DEV,
-				useNewUrlParser: true,
-				useUnifiedTopology: true,
 				family: 4, // Force IPv4
 				serverSelectionTimeoutMS: 15000, // Increase timeout for slow connections
 			}),
