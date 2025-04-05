@@ -6,8 +6,8 @@ services:
     ports:
       - 5001:5007
     volumes:
-      - ./:/user/src/furnix
-    working_dir: /user/src/furnix
+      - ./:/user/src/furnix-real
+    working_dir: /user/src/furnix-real
     networks:
       - monorepo-network
 
@@ -21,8 +21,8 @@ services:
     ports:
       - 5002:5008
     volumes:
-      - ./:/user/src/furnix
-    working_dir: /user/src/furnix
+      - ./:/user/src/furnix-real
+    working_dir: /user/src/furnix-real
     networks:
       - monorepo-network
 
