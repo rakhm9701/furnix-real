@@ -4,13 +4,13 @@ services:
     restart: always
     image: node:20.17.0
     network_mode: "host"
-    ports:
-    - 5001:5007
+    # ports qatorini olib tashlang
     dns:
       - 8.8.8.8
       - 8.8.4.4
     environment:
       - NODE_OPTIONS=--dns-result-order=ipv4first
+      - PORT_API=5007  # Bu yerda port belgilang
     volumes:
       - ./:/user/src/furnix
     working_dir: /user/src/furnix
@@ -21,19 +21,17 @@ services:
     restart: unless-stopped
     image: node:20.17.0
     network_mode: "host"
-    ports:
-    - 5002:5008
+    # ports qatorini olib tashlang
     dns:
       - 8.8.8.8
       - 8.8.4.4
     environment:
       - NODE_OPTIONS=--dns-result-order=ipv4first
-      - PORT_BATCH=5008  # Port o'zgaruvchisini qo'shing
+      - PORT_BATCH=5008
     volumes:
       - ./:/user/src/furnix
     working_dir: /user/src/furnix
     command: bash -c "npm install && npm run build && npm run start:prod:batch"
-
 networks:
   monorepo-network:
     driver: bridge
