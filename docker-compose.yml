@@ -16,7 +16,7 @@ services:
     working_dir: /usr/src/furnix
     # networks: 
     #   - monorepo-network
-    command: bash -c "rm -f dist && npm install && npm run build && npm run start:prod"
+    command: bash -c "rm -rf dist && npm install && npm run build && npm run start:prod"
 
   # furnix-batch:
   #   container_name: furnix-batch
