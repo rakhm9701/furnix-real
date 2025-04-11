@@ -12,8 +12,8 @@ services:
     volumes:
       - ./:/usr/src/furnix
     working_dir: /usr/src/furnix
-    networks:
-      - monorepo-network
+    # networks:
+    #   - monorepo-network
     command: bash -c "rm -rf dist && npm install && npm run build && npm run start:prod"
     
 #   furnix-batch:
