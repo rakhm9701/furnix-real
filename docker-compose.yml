@@ -3,20 +3,26 @@ services:
     container_name: furnix-api
     restart: always
     image: node:20.17.0
-    ports: 
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    ports:
       - "5001:5007"
-    volumes: 
+    volumes:
       - ./:/usr/src/furnix
     working_dir: /usr/src/furnix
-    networks: 
+    networks:
       - monorepo-network
     command: bash -c "rm -rf dist && npm install && npm run build && npm run start:prod"
-
+    
   furnix-batch:
     container_name: furnix-batch
     restart: unless-stopped
     image: node:20.17.0
-    ports: 
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    ports:
       - "5002:5008"
     volumes:
       - ./:/usr/src/furnix
